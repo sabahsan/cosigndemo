@@ -1,0 +1,100 @@
+
+name: cosigndemo-ci.yml
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  install-and-sign:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install cosign
+        uses: sigstore/cosign-installer@v3.5.0
+        with:
+          cosign-release: 'v2.4.1'
+
+      - name: Sign blob
+        env:
+          COSIGN_PASSWORD: "${{ secrets.COSIGN_PASSWORD }}"
+        run: |
+          echo "${{ secrets.COSIGN_PRIVATE_KEY }}" > cosign.key
+          chmod 600 cosign.key
+          cosign sign-blob \
+            --tlog-upload=false \
+            --key cosign.key \
+            --output-signature random-binary-file.sig \
+            random-binary-file.bin
+
+      - name: Upload binary and signature
+        uses: actions/upload-artifact@v4
+        with:
+          name: cosign-artifacts
+          path: |
+            random-binary-file.bin
+            random-binary-file.sig
+
+  verify-signed-blob:
+    runs-on: ubuntu-latest
+    needs: install-and-sign
+    steps:
+      - name: Install cosign
+        uses: sigstore/cosign-installer@v3.5.0
+        with:
+          cosign-release: 'v2.4.1'
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: cosign-artifacts
+          path: ./artifacts
+
+      - name: Verify blob
+        run: |
+          echo "${{ secrets.COSIGN_PUBLIC_KEY }}" > cosign.pub
+          cosign verify-blob \
+            --insecure-ignore-tlog=true \
+            --key cosign.pub \
+            --signature ./artifacts/random-binary-file.sig \
+            ./artifacts/random-binary-file.bin
+          if [ $? -ne 0 ]; then
+            printf "Blob verification failed with exit code: %d\n" $?
+            exit 1
+          fi
+          echo "Blob verification successful"
+
+  verify-artifacts:
+    runs-on: ubuntu-latest
+    needs: install-and-sign
+    steps:
+      - name: Install cosign
+        uses: sigstore/cosign-installer@v3.5.0
+        with:
+          cosign-release: 'v2.4.1'
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: cosign-artifacts
+          path: ./artifacts
+
+      - name: Verify uploaded blob
+        run: |
+          echo "${{ secrets.COSIGN_PUBLIC_KEY }}" > cosign.pub
+          output=$(cosign verify-blob \
+            --key cosign.pub \
+            --insecure-ignore-tlog=true \
+            --signature ./artifacts/random-binary-file.sig \
+            ./artifacts/random-binary-file.bin)
+          last_line=$(tail -n 1 <<< "$output")
+          if [[ "$last_line" != "Verified OK" ]]; then
+            printf "Verification failed with the error: %s\n" ${output}
+            exit 1
+          fi
+          echo "Verification successful"
+
