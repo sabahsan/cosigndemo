@@ -68,33 +68,3 @@ jobs:
           fi
           echo "Blob verification successful"
 
-  verify-artifacts:
-    runs-on: ubuntu-latest
-    needs: install-and-sign
-    steps:
-      - name: Install cosign
-        uses: sigstore/cosign-installer@v3.5.0
-        with:
-          cosign-release: 'v2.4.1'
-
-      - name: Download artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: cosign-artifacts
-          path: ./artifacts
-
-      - name: Verify uploaded blob
-        run: |
-          echo "${{ secrets.COSIGN_PUBLIC_KEY }}" > cosign.pub
-          output=$(cosign verify-blob \
-            --key cosign.pub \
-            --insecure-ignore-tlog=true \
-            --signature ./artifacts/random-binary-file.sig \
-            ./artifacts/random-binary-file.bin)
-          last_line=$(tail -n 1 <<< "$output")
-          if [[ "$last_line" != *"Verified OK"* ]]; then
-            printf "Verification failed with the error: %s\n" ${output}
-            exit 1
-          fi
-          echo "Verification successful"
-
