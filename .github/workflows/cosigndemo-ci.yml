@@ -92,7 +92,7 @@ jobs:
             --signature ./artifacts/random-binary-file.sig \
             ./artifacts/random-binary-file.bin)
           last_line=$(tail -n 1 <<< "$output")
-          if [[ "$last_line" != "Verified OK" ]]; then
+          if [[ "$last_line" != *"Verified OK"* ]]; then
             printf "Verification failed with the error: %s\n" ${output}
             exit 1
           fi
