@@ -114,14 +114,14 @@ jobs:
           path: ./artifacts
 
       - name: Set certificate identity
-        run: echo "CERT_ID=https://github.com/${{ github.repository }}/.github/workflow.yml@${{ github.ref }}" >> $GITHUB_ENV
+        run: echo "CERT_ID=https://github.com/${{ github.repository }}/.github/workflows/cosigndemo-ci.yml@${{ github.ref }}" >> $GITHUB_ENV
 
       - name: Keyless verify blob
         run: |
           cosign verify-blob \
             --cert ./artifacts/krbf-cert.pem \
             --certificate-identity "$CERT_ID" \
-            --certificate-oidc-issuer "${{ secrets.CERTIFICATE_OIDC_ISSUER }}" \
+            --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
             --signature ./artifacts/keyless-random-binary-file.sig \
             ./artifacts/keyless-random-binary-file.bin
           if [ $? -ne 0 ]; then
