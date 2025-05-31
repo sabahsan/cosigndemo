@@ -97,4 +97,33 @@ jobs:
             keyless-random-binary-file.bin
             keyless-random-binary-file.sig
             krbf-cert.pem
-            
+
+  keyless-verify-signed-blob:
+    runs-on: ubuntu-latest
+    needs: keyless-sign-blob
+    steps:
+      - name: Install cosign
+        uses: sigstore/cosign-installer@v3.5.0
+        with:
+          cosign-release: 'v2.4.1'
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: keyless-cosign-artifacts
+          path: ./artifacts
+
+      - name: Keyless verify blob
+        run: |
+          cosign verify-blob \
+            --cert ./artifacts/krbf-cert.pem \
+            --certificate-identity "${{ secrets.CERTIFICATE_IDENTITY }}" \
+            --certificate-oidc-issuer "${{ secrets.CERTIFICATE_OIDC_ISSUER }}" \
+            --signature ./artifacts/keyless-random-binary-file.sig \
+            ./artifacts/keyless-random-binary-file.bin
+          if [ $? -ne 0 ]; then
+            printf "Keyless blob verification failed with exit code: %d\n" $?
+            exit 1
+          fi
+          echo "Keyless blob verification successful"
+
