@@ -11,7 +11,7 @@
 
 ## Introduction
 
-The increasing prevalence of software supply chain attacks has emphasized the importance of securing the integrity and authenticity of software artifacts. During my internship at PnE Technologies, my primary objective was to investigate, select, and implement a robust software supply chain security solution. This report documents my work on evaluating existing tools and implementing Cosign to sign, verify, and attest software artifacts produced by PnE Technology. I would like to thank you Mr. Waqas and Mr. Hassan Younus for their continued support and guidance during the internship. Overall, the intership was a very good learning experience for me and I enjoyed working being part of the team. 
+The increasing prevalence of software supply chain attacks has emphasized the importance of securing the integrity and authenticity of software artifacts. During my internship at PnE Technologies, my primary objective was to investigate, select, and implement a robust software supply chain security solution. This report documents my work on evaluating existing tools and implementing Cosign to sign, verify, and attest software artifacts produced by PnE Technology. I would like to thank you Mr. Muhammad Waqas and Mr. Hassan Younus for their continued support and guidance during the internship. Overall, the intership was a very good learning experience for me and I enjoyed working being part of the team. 
 
 ## Objectives
 
@@ -372,4 +372,10 @@ The above code describes two pipeline jobs `keyless-sign-blob` and `keyless-veri
 ## Conclusion
 
 This internship provided me a valuable hands-on experience in the field of software supply chain security. I learned to establish artifacts integrity by using Cosign tool for both key-based and keyless blob signing and verification. The work enhanced my understanding of cryptographic trust models for CI/CD integration.
+
+## References
+
+1. [PnE Technology](https://pnetechnology.com/)
+2. [Cosign](https://github.com/sigstore/cosign)
+3. [Github Guide to CI/CD](https://github.blog/developer-skills/github/a-beginners-guide-to-ci-cd-and-automation-on-github/)
 
